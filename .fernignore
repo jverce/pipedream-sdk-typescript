@@ -2,3 +2,6 @@
 .gitignore
 .prettierrc.yml
 LICENSE
+
+src/wrapper
+src/index.ts
