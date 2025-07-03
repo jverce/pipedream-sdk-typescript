@@ -1,2 +1,5 @@
-tabWidth: 2
+bracketSameLine: false
 printWidth: 120
+singleAttributePerLine: true
+tabWidth: 2
+trailingComma: all
