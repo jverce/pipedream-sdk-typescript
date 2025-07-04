@@ -51,6 +51,7 @@ export class Pipedream extends PipedreamClient {
       clientId,
       clientSecret,
       environment,
+      xPdEnvironment: projectEnvironment,
       projectEnvironment,
       projectId,
     });
