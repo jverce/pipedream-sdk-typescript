@@ -63,8 +63,8 @@ changes:
   naming convention to align with our [OpenAPI
   spec](https://api.pipedream.com/api-docs/swagger.json).
 - **Client Initialization**: The `createBackendClient()` and
-  `createFrontendClient()` methods have been replaced with a new `Pipedream`
-  class.
+  `createFrontendClient()` methods have been replaced with a new
+  `PipedreamClient` class.
 - **TypeScript Types**: All TypeScript types are now exported for better type
   safety.
 
@@ -72,8 +72,8 @@ changes:
 
 ### Server-side
 
-For server-side applications, we recommend using the `Pipedream` wrapper class,
-which simplifies OAuth token management.
+For server-side applications, we recommend using the `PipedreamClient` wrapper
+class, which simplifies OAuth token management.
 
 #### v1.x (old)
 
@@ -93,21 +93,19 @@ const client = createBackendClient({
 #### v2.x (new)
 
 ```javascript
-import { Pipedream } from '@pipedream/sdk';
+import { PipedreamClient } from '@pipedream/sdk';
 
-const client = new Pipedream({
-  credentials: {
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret',
-  },
+const client = new PipedreamClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
   projectId: 'your-project-id',
-  environment: 'development', // or 'production'
+  projectEnvironment: 'development', // or 'production'
 });
 ```
 
 ### Browser-side
 
-For browser-side applications, you should use the `Pipedream` class and
+For browser-side applications, you should use the `PipedreamClient` class and
 authenticate using a `connect_token` obtained from your backend.
 
 #### v1.x (old)
@@ -126,12 +124,12 @@ const frontendClient = createFrontendClient({
 #### v2.x (new)
 
 ```javascript
-import { Pipedream } from '@pipedream/sdk';
+import { PipedreamClient } from '@pipedream/sdk';
 
-const frontendClient = new Pipedream({
+const frontendClient = new PipedreamClient({
   token: 'connect-token-from-backend',
   projectId: 'your-project-id',
-  environment: 'development', // or 'production'
+  projectEnvironment: 'development', // or 'production'
 });
 ```
 
@@ -298,7 +296,7 @@ The v2.x SDK includes several new features not available in v1.x:
 ### Full TypeScript support
 
 ```typescript
-import { Pipedream, type RunActionResponse } from '@pipedream/sdk';
+import { type RunActionResponse } from '@pipedream/sdk';
 
 const result: RunActionResponse = await client.actions.run({
   external_user_id: 'jverce',
@@ -477,7 +475,7 @@ Then, in your code, you can import the new SDK with the alias:
 
 ```javascript
 import { createBackendClient } from '@pipedream/sdk';
-import { Pipedream } from '@pipedream/sdk-v2';
+import { PipedreamClient } from '@pipedream/sdk-v2';
 
 const clientOpts = {
   credentials: {
@@ -489,7 +487,11 @@ const clientOpts = {
 }
 
 const client = createBackendClient(clientOpts);
-const newClient = new Pipedream(clientOpts)
+const newClient = new PipedreamClient({
+  ...clientOpts.credentials,
+  projectEnvironment: clientOpts.environment,
+  projectId: clientOpts.projectId,
+});
 
 // Use old client for existing code
 const oldResult = await client.runAction({
@@ -517,9 +519,9 @@ const newResult = await newClient.actions.run({
 ## Migration checklist
 
 - [ ] Update import statements from `createBackendClient`/`createFrontendClient`
-  to `Pipedream`.
-- [ ] Update client initialization to use `new Pipedream()` for both server-side
-  and browser-side.
+  to `PipedreamClient`.
+- [ ] Update client initialization to use `new PipedreamClient()` for both
+  server-side and browser-side.
 - [ ] Convert all method calls to use namespaced format (e.g.,
   `client.actions.run()`).
 - [ ] Update all parameter names from camelCase to snake_case.
