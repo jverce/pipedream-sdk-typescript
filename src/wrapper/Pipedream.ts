@@ -1,6 +1,6 @@
-import { ProjectEnvironment } from "../api";
-import { PipedreamClient } from "../Client";
-import { PipedreamEnvironment } from "../environments";
+import { ProjectEnvironment } from "../api.js";
+import { PipedreamClient } from "../Client.js";
+import { PipedreamEnvironment } from "../environments.js";
 
 export interface BackendOpts {
   clientId?: string;
