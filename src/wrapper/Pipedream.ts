@@ -19,7 +19,7 @@ export interface BackendOpts {
  * @returns The base URL for the Pipedream API.
  */
 const getBaseUrl = (environment: PipedreamEnvironment) =>
-  environment.replace(/\${(\w+)}/g, (_, name) => process.env[name] ?? "");
+  environment.replace(/\$\{(\w+)\}/g, (_, name) => process.env[name] ?? "");
 
 export class Pipedream extends PipedreamClient {
   public constructor(opts: BackendOpts) {
