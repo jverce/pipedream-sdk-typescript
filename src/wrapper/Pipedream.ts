@@ -1,4 +1,4 @@
-import { ProjectEnvironment } from "../api.js";
+import { ProjectEnvironment } from "../api/index.js";
 import { PipedreamClient } from "../Client.js";
 import { PipedreamEnvironment } from "../environments.js";
 
