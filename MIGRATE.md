@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Migrating from v1.x
 
 This guide will help you migrate your existing Pipedream SDK v1.x integration to
@@ -16,6 +17,7 @@ the latest version.
     - [Browser-side](#browser-side)
       - [v1.x (old)](#v1x-old-1)
       - [v2.x (new)](#v2x-new-1)
+    - [Environment variables](#environment-variables)
   - [Method migration](#method-migration)
     - [Method and parameter naming](#method-and-parameter-naming)
     - [Migration examples](#migration-examples)
@@ -31,6 +33,24 @@ the latest version.
       - [Creating connect tokens](#creating-connect-tokens)
         - [v1.x (old)](#v1x-old-5)
         - [v2.x (new)](#v2x-new-5)
+      - [Validating connect tokens](#validating-connect-tokens)
+        - [v1.x (old)](#v1x-old-6)
+        - [v2.x (new)](#v2x-new-6)
+      - [Configuring component props](#configuring-component-props)
+        - [v1.x (old)](#v1x-old-7)
+        - [v2.x (new)](#v2x-new-7)
+      - [Deleting accounts](#deleting-accounts)
+        - [v1.x (old)](#v1x-old-8)
+        - [v2.x (new)](#v2x-new-8)
+      - [Getting project info](#getting-project-info)
+        - [v1.x (old)](#v1x-old-9)
+        - [v2.x (new)](#v2x-new-9)
+      - [Making proxy requests](#making-proxy-requests)
+        - [v1.x (old)](#v1x-old-10)
+        - [v2.x (new)](#v2x-new-10)
+      - [Invoking workflows](#invoking-workflows)
+        - [v1.x (old)](#v1x-old-11)
+        - [v2.x (new)](#v2x-new-11)
   - [Namespace mapping](#namespace-mapping)
   - [New features in v2.x](#new-features-in-v2x)
     - [Full TypeScript support](#full-typescript-support)
@@ -41,6 +61,7 @@ the latest version.
     - [Raw response access](#raw-response-access)
   - [Additional namespaces](#additional-namespaces)
   - [Partial migration](#partial-migration)
+  - [Important removed functionality](#important-removed-functionality)
   - [Migration checklist](#migration-checklist)
 
 ## Deprecation
@@ -67,6 +88,10 @@ changes:
   `PipedreamClient` class.
 - **TypeScript Types**: All TypeScript types are now exported for better type
   safety.
+- **Authentication Changes**: The `rawAccessToken()` method has been replaced
+  with the `oauthTokens.create()` namespace.
+- **Environment Variables**: The SDK now supports automatic configuration via
+  environment variables (see below).
 
 ## Client initialization
 
@@ -130,6 +155,23 @@ const frontendClient = new PipedreamClient({
   token: 'connect-token-from-backend',
   projectId: 'your-project-id',
   projectEnvironment: 'development', // or 'production'
+});
+```
+
+### Environment variables
+
+The v2.x SDK supports automatic configuration via environment variables:
+
+```javascript
+// These environment variables are automatically used if set:
+// PIPEDREAM_CLIENT_ID
+// PIPEDREAM_CLIENT_SECRET
+// PIPEDREAM_PROJECT_ID
+// PIPEDREAM_PROJECT_ENVIRONMENT (defaults to 'production')
+
+// You can initialize the client with minimal configuration
+const client = new PipedreamClient({
+  projectId: 'your-project-id', // Can also come from PIPEDREAM_PROJECT_ID
 });
 ```
 
@@ -265,29 +307,258 @@ const token = await client.tokens.create({
 });
 ```
 
+#### Validating connect tokens
+
+##### v1.x (old)
+
+```javascript
+// validateConnectToken was available in v1.x
+const isValid = await client.validateConnectToken({
+  token: 'connect-token-to-validate',
+});
+```
+
+##### v2.x (new)
+
+```javascript
+const validation = await client.tokens.validate({
+  token: 'connect-token-to-validate',
+});
+```
+
+#### Configuring component props
+
+##### v1.x (old)
+
+```javascript
+const response = await client.configureComponent({
+  externalUserId: 'jverce',
+  componentId: 'gitlab-new-issue',
+  propName: 'projectId',
+  configuredProps: {
+    gitlab: { authProvisionId: 'apn_kVh9AoD' },
+  },
+});
+```
+
+##### v2.x (new)
+
+```javascript
+const response = await client.components.configureProp({
+  external_user_id: 'jverce',
+  id: 'gitlab-new-issue',
+  prop_name: 'projectId',
+  configured_props: {
+    gitlab: { authProvisionId: 'apn_kVh9AoD' },
+  },
+});
+```
+
+#### Deleting accounts
+
+##### v1.x (old)
+
+```javascript
+// Delete specific account
+await client.deleteAccount('account-id');
+
+// Delete all accounts for an app
+await client.deleteAccountsByApp('app-id');
+
+// Delete external user
+await client.deleteExternalUser('jverce');
+```
+
+##### v2.x (new)
+
+```javascript
+// Delete specific account
+await client.accounts.delete('account-id');
+
+// Delete all accounts for an app - functionality removed
+// Consider using accounts.list() and deleting individually
+
+// Delete external user - use users namespace
+await client.users.delete({
+  external_user_id: 'jverce',
+});
+```
+
+#### Getting project info
+
+##### v1.x (old)
+
+```javascript
+const projectInfo = await client.getProjectInfo();
+console.log(projectInfo.apps);
+```
+
+##### v2.x (new)
+
+```javascript
+const project = await client.projects.retrieve();
+console.log(project);
+```
+
+#### Making proxy requests
+
+##### v1.x (old)
+
+```javascript
+// v1.x uses a single method with two parameters
+const response = await client.makeProxyRequest({
+  searchParams: {
+    external_user_id: 'jverce',
+    account_id: 'apn_kVh9AoD',
+  },
+}, {
+  url: 'https://api.example.com/data',
+  options: {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  },
+});
+
+// POST request with body
+const postResponse = await client.makeProxyRequest({
+  searchParams: {
+    external_user_id: 'jverce',
+    account_id: 'apn_kVh9AoD',
+  },
+}, {
+  url: 'https://api.example.com/users',
+  options: {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: 'John Doe' }),
+  },
+});
+```
+
+##### v2.x (new)
+
+```javascript
+// v2.x uses separate methods for each HTTP verb
+const response = await client.proxy.get({
+  external_user_id: 'jverce',
+  account_id: 'apn_kVh9AoD',
+  url: 'https://api.example.com/data',
+  headers: {
+    'Accept': 'application/json',
+  },
+  params: {}, // Additional query parameters if needed
+});
+
+// POST request with body
+const postResponse = await client.proxy.post({
+  external_user_id: 'jverce',
+  account_id: 'apn_kVh9AoD',
+  url: 'https://api.example.com/users',
+  body: { name: 'John Doe' }, // Body is passed as an object, not a string
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Other HTTP methods are available
+await client.proxy.put({ /* ... */ });
+await client.proxy.delete({ /* ... */ });
+await client.proxy.patch({ /* ... */ });
+```
+
+#### Invoking workflows
+
+##### v1.x (old)
+
+```javascript
+// Invoke a workflow
+const response = await client.invokeWorkflow(
+  'https://your-endpoint.m.pipedream.net',
+  {
+    foo: 123,
+    bar: 'abc',
+  },
+  HTTPAuthType.OAuth // Optional auth type
+);
+
+// Invoke a workflow for an external user
+const response = await client.invokeWorkflowForExternalUser(
+  'https://your-workflow-url.m.pipedream.net',
+  'jverce', // external user ID as second parameter
+  {
+    foo: 123,
+    bar: 'abc',
+  }
+);
+```
+
+##### v2.x (new)
+
+```javascript
+// Invoke a workflow
+const response = await client.workflows.invoke({
+  urlOrEndpoint: 'https://your-endpoint.m.pipedream.net',
+  body: {
+    foo: 123,
+    bar: 'abc',
+  },
+  headers: {
+    'Accept': 'application/json',
+  },
+}, Pipedream.HTTPAuthType.OAuth);
+
+// Invoke a workflow for an external user
+const response = await client.workflows.invokeForExternalUser({
+  urlOrEndpoint: 'https://your-workflow-url.m.pipedream.net',
+  externalUserId: 'jverce', // now part of the options object
+  body: {
+    foo: 123,
+    bar: 'abc',
+  },
+});
+```
+
 ## Namespace mapping
 
 Here's a complete list of how v1.x methods map to v2.x namespaced methods:
 
-| v1.x Method               | v2.x Method                   |
-| ------------------------- | ----------------------------- |
-| `runAction()`             | `actions.run()`               |
-| `getAccounts()`           | `accounts.list()`             |
-| `getAccountById()`        | `accounts.retrieve()`         |
-| `deleteAccount()`         | `accounts.delete()`           |
-| `createConnectToken()`    | `tokens.create()`             |
-| `validateConnectToken()`  | `tokens.validate()`           |
-| `deployTrigger()`         | `triggers.deploy()`           |
-| `getDeployedTriggers()`   | `deployedTriggers.list()`     |
-| `getDeployedTrigger()`    | `deployedTriggers.retrieve()` |
-| `updateDeployedTrigger()` | `deployedTriggers.update()`   |
-| `deleteDeployedTrigger()` | `deployedTriggers.delete()`   |
-| `getUsers()`              | `users.list()`                |
-| `getUser()`               | `users.retrieve()`            |
-| `getApps()`               | `apps.list()`                 |
-| `getApp()`                | `apps.retrieve()`             |
-| `getComponents()`         | `components.list()`           |
-| `getComponent()`          | `components.retrieve()`       |
+| v1.x Method                       | v2.x Method                          |
+| --------------------------------- | ------------------------------------ |
+| `runAction()`                     | `actions.run()`                      |
+| `getAccounts()`                   | `accounts.list()`                    |
+| `getAccountById()`                | `accounts.retrieve()`                |
+| `deleteAccount()`                 | `accounts.delete()`                  |
+| `deleteAccountsByApp()`           | Not available (use list + delete)    |
+| `deleteExternalUser()`            | `users.delete()`                     |
+| `createConnectToken()`            | `tokens.create()`                    |
+| `validateConnectToken()`          | `tokens.validate()`                  |
+| `deployTrigger()`                 | `triggers.deploy()`                  |
+| `getDeployedTriggers()`           | `deployedTriggers.list()`            |
+| `getDeployedTrigger()`            | `deployedTriggers.retrieve()`        |
+| `updateDeployedTrigger()`         | `deployedTriggers.update()`          |
+| `deleteDeployedTrigger()`         | `deployedTriggers.delete()`          |
+| `getTriggerEvents()`              | `deployedTriggers.listEvents()`      |
+| `getTriggerWebhooks()`            | `deployedTriggers.listWebhooks()`    |
+| `updateTriggerWebhooks()`         | `deployedTriggers.updateWebhooks()`  |
+| `getTriggerWorkflows()`           | `deployedTriggers.listWorkflows()`   |
+| `updateTriggerWorkflows()`        | `deployedTriggers.updateWorkflows()` |
+| `getUsers()`                      | `users.list()`                       |
+| `getUser()`                       | `users.retrieve()`                   |
+| `getApps()`                       | `apps.list()`                        |
+| `getApp()`                        | `apps.retrieve()`                    |
+| `getComponents()`                 | `components.list()`                  |
+| `getComponent()`                  | `components.retrieve()`              |
+| `configureComponent()`            | `components.configureProp()`         |
+| `reloadComponentProps()`          | `components.reloadProps()`           |
+| `getProjectInfo()`                | `projects.retrieve()`                |
+| `makeProxyRequest()`              | `proxy.get()`, `proxy.post()`, etc.  |
+| `invokeWorkflow()`                | `workflows.invoke()`                 |
+| `invokeWorkflowForExternalUser()` | `workflows.invokeForExternalUser()`  |
+| `rawAccessToken()`                | Not available (managed internally)   |
 
 ## New features in v2.x
 
@@ -459,6 +730,7 @@ The v2.x SDK includes several new namespaces not available in v1.x:
 - `triggers` - Additional trigger operations beyond deployment
 - `users` - User information
 - `oauthTokens` - OAuth token management
+- `workflows` - Invoke workflows
 
 ## Partial migration
 
@@ -516,6 +788,26 @@ const newResult = await newClient.actions.run({
 });
 ```
 
+## Important removed functionality
+
+Some methods from v1.x have been removed or changed significantly in v2.x:
+
+1. **`deleteAccountsByApp()`** - This bulk deletion method is no longer
+   available. You'll need to list accounts for an app and delete them
+   individually.
+
+2. **`rawAccessToken()`** - Direct access token retrieval has been removed. The
+   v2.x SDK manages OAuth tokens internally and doesn't expose them directly. If
+   you need to make authenticated requests, use the built-in methods or the
+   proxy namespace.
+
+3. **Alternative method names** - The v1.x SDK provided alternative method names
+   (e.g., `actionRun()` as an alias for `runAction()`). These are no longer
+   available in v2.x.
+
+4. **`userId` parameter** - The deprecated `userId` parameter has been removed.
+   Always use `external_user_id` instead.
+
 ## Migration checklist
 
 - [ ] Update import statements from `createBackendClient`/`createFrontendClient`
@@ -529,5 +821,8 @@ const newResult = await newClient.actions.run({
 - [ ] Update error handling to use `PipedreamError` type.
 - [ ] Review and implement new features like pagination and request options
   where beneficial.
+- [ ] Replace any usage of removed methods with their alternatives.
+- [ ] Update any code using `rawAccessToken()` to use the OAuth tokens
+  namespace.
 - [ ] Test all migrated code thoroughly.
 - [ ] Remove the old SDK dependency once migration is complete.
