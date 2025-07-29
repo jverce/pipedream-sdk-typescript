@@ -1,20 +1,27 @@
 import { ProjectEnvironment } from "../api/index.js";
 import { Workflows } from "../api/resources/workflows/client/Client.js";
 import { PipedreamClient } from "../Client.js";
-import * as environments from "../environments.js";
+import { PipedreamEnvironment } from "../environments.js";
 
 export interface BackendOpts {
   clientId?: string;
   clientSecret?: string;
-  environment?: environments.PipedreamEnvironment;
+  environment?: PipedreamEnvironment;
   projectEnvironment?: ProjectEnvironment;
   projectId: string;
   workflowDomain?: string;
 }
 
-function expandEnvVars(template: string) {
-  return template.replace(/\$\{(\w+)\}/g, (_, key) => process.env[key] ?? "");
-}
+/**
+ * Returns the base URL for the Pipedream API based on the provided environment.
+ * It replaces any placeholders in the environment string with corresponding
+ * environment variables.
+ *
+ * @param environment - The Pipedream environment string.
+ * @returns The base URL for the Pipedream API.
+ */
+const getBaseUrl = (environment: PipedreamEnvironment) =>
+  environment.replace(/\$\{(\w+)\}/g, (_, name) => process.env[name] ?? "");
 
 export class Pipedream extends PipedreamClient {
   private _workflowDomain?: string;
@@ -24,11 +31,11 @@ export class Pipedream extends PipedreamClient {
     const {
       clientId = process.env.PIPEDREAM_CLIENT_ID,
       clientSecret = process.env.PIPEDREAM_CLIENT_SECRET,
-      environment: rawEnvironment = environments.PipedreamEnvironment.Prod,
+      environment = PipedreamEnvironment.Prod,
       projectEnvironment = process.env.PIPEDREAM_PROJECT_ENVIRONMENT ?? "production",
       projectId = process.env.PIPEDREAM_PROJECT_ID,
       workflowDomain,
-    } = opts;
+    } = opts || {};
     if (!projectEnvironment) {
       throw new Error("Project environment cannot be empty");
     }
@@ -39,9 +46,10 @@ export class Pipedream extends PipedreamClient {
       throw new Error("Project ID is required");
     }
 
-    const environment = expandEnvVars(rawEnvironment.toString());
+    const baseUrl = getBaseUrl(environment);
 
     super({
+      baseUrl,
       clientId,
       clientSecret,
       environment,
