@@ -42,6 +42,8 @@ export declare namespace PipedreamClient {
         abortSignal?: AbortSignal;
         /** Override the x-pd-environment header */
         projectEnvironment?: Pipedream.ProjectEnvironment | undefined;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -49,7 +51,7 @@ export declare namespace PipedreamClient {
 
 export class PipedreamClient {
     protected readonly _options: PipedreamClient.Options;
-    private readonly _oauthTokenProvider: core.OAuthTokenProvider;
+    protected readonly _oauthTokenProvider: core.OAuthTokenProvider;
     protected _appCategories: AppCategories | undefined;
     protected _apps: Apps | undefined;
     protected _accounts: Accounts | undefined;

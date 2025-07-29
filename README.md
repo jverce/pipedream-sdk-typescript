@@ -31,6 +31,7 @@ const client = new PipedreamClient({
     clientId: "YOUR_CLIENT_ID",
     clientSecret: "YOUR_CLIENT_SECRET",
     projectEnvironment: "YOUR_PROJECT_ENVIRONMENT",
+    projectId: "YOUR_PROJECT_ID",
 });
 await client.accounts.create({
     app_slug: "app_slug",
@@ -83,6 +84,7 @@ const client = new PipedreamClient({
     clientId: "YOUR_CLIENT_ID",
     clientSecret: "YOUR_CLIENT_SECRET",
     projectEnvironment: "YOUR_PROJECT_ENVIRONMENT",
+    projectId: "YOUR_PROJECT_ID",
 });
 const response = await client.apps.list();
 for await (const item of response) {
@@ -106,6 +108,18 @@ If you would like to send additional headers as part of the request, use the `he
 const response = await client.accounts.create(..., {
     headers: {
         'X-Custom-Header': 'custom value'
+    }
+});
+```
+
+### Additional Query String Parameters
+
+If you would like to send additional query string parameters as part of the request, use the `queryParams` request option.
+
+```typescript
+const response = await client.accounts.create(..., {
+    queryParams: {
+        'customQueryParamKey': 'custom query param value'
     }
 });
 ```
@@ -166,8 +180,7 @@ console.log(rawResponse.headers['X-My-Header']);
 
 ### Runtime Compatibility
 
-The SDK defaults to `node-fetch` but will use the global fetch client if present. The SDK works in the following
-runtimes:
+The SDK works in the following runtimes:
 
 - Node.js 18+
 - Vercel

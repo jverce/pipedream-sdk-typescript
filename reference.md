@@ -289,7 +289,7 @@ await client.accounts.create({
 <dl>
 <dd>
 
-**request:** `Pipedream.CreateAccountRequest`
+**request:** `Pipedream.CreateAccountOpts`
 
 </dd>
 </dl>
@@ -2148,7 +2148,6 @@ await client.proxy.patch("url_64", {
 ```typescript
 await client.tokens.create({
     external_user_id: "external_user_id",
-    project_id: "project_id",
 });
 ```
 
@@ -2165,7 +2164,7 @@ await client.tokens.create({
 <dl>
 <dd>
 
-**request:** `Pipedream.CreateTokenRequest`
+**request:** `Pipedream.CreateTokenOpts`
 
 </dd>
 </dl>
@@ -2283,6 +2282,142 @@ await client.oauthTokens.create({
 <dd>
 
 **requestOptions:** `OauthTokens.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+## Workflows
+
+<details><summary><code>client.workflows.<a href="/src/api/resources/workflows/client/Client.ts">invoke</a>({ ...params }, authType?) -> unknown</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Invoke with URL
+await client.workflows.invoke({
+    urlOrEndpoint: "https://en-your-endpoint.m.pipedream.net",
+    body: {
+        foo: 123,
+        bar: "abc",
+        baz: null,
+    },
+    headers: {
+        Accept: "application/json",
+    },
+});
+
+// Invoke with endpoint ID
+await client.workflows.invoke({
+    urlOrEndpoint: "en123",
+    body: {
+        message: "Hello, World\!",
+    },
+}, Pipedream.HTTPAuthType.OAuth);
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request:** `Pipedream.InvokeWorkflowOpts`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**authType:** `Pipedream.HTTPAuthType` — The type of authorization to use for the request (defaults to None)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Workflows.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.workflows.<a href="/src/api/resources/workflows/client/Client.ts">invokeForExternalUser</a>({ ...params }) -> unknown</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.workflows.invokeForExternalUser({
+    urlOrEndpoint: "https://your-workflow-url.m.pipedream.net",
+    externalUserId: "your-external-user-id",
+    body: {
+        foo: 123,
+        bar: "abc",
+        baz: null,
+    },
+    headers: {
+        Accept: "application/json",
+    },
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request:** `Pipedream.InvokeWorkflowForExternalUserOpts`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Workflows.RequestOptions`
 
 </dd>
 </dl>
