@@ -60,6 +60,15 @@ export class Pipedream extends PipedreamClient {
     this._workflowDomain = workflowDomain;
   }
 
+  /**
+   * Returns an access token that can be used to authenticate API requests
+   *
+   * @returns A promise that resolves to the access token string.
+   */
+  public get rawAccessToken(): Promise<string> {
+    return this._oauthTokenProvider.getToken();
+  }
+
   public get workflows(): Workflows {
     return (this._workflows ??= new Workflows({
       ...this._options,
