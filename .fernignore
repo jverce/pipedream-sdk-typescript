@@ -1,13 +1,26 @@
 # Specify files that shouldn't be modified by Fern
+
+# Custom CI/CD
 .github/workflows/auto-close-empty-prs.yml
 .github/workflows/ci.yml
+
 .gitignore
 .prettierrc.yml
+
+# Our own license
 LICENSE
 
+# References doc (we have additional use cases)
+reference.md
+
+# Custom Pipedream client files
 src/api/resources/index.ts
-src/api/resources/proxy/client/*
-src/api/resources/workflows/client/*
 src/api/types/index.ts
 src/index.ts
 src/wrapper
+
+# Custom Proxy files
+src/api/resources/proxy/client/*
+
+# Custom Workflow files
+src/api/resources/workflows/client/*
